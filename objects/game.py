@@ -4,7 +4,7 @@ import pygame as pg
 
 
 class Game:
-    def __init__(self) -> None:
+    def __init__(self, playerName: str, record: dict) -> None:
         pg.init()
         # load_dotenv()
 
@@ -19,8 +19,10 @@ class Game:
         self.screen = pg.display.set_mode([self.WINDOW_SIZE] * 2)
         self.clock = pg.time.Clock()
 
-        pg.display.set_caption('Score: 0 | Record: 567')
+        pg.display.set_caption(f"{playerName} --- Score: 0 | Record: {record['val']}({record['name']})")
 
+        self.name = playerName
+        self.record = record
 
     def draw_tiles(self):
         for x in range(0, self.WINDOW_SIZE, self.TILE_SIZE):

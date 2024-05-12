@@ -5,6 +5,8 @@ from random import randrange
 from objects.game import Game
 from .utils.utils import getRandomPos
 
+from objects.db import *
+
 
 class Player:
     def __init__(self, game: Game) -> None:
@@ -18,10 +20,11 @@ class Player:
         self.segments = []
         self.directions = {pg.K_w: 1, pg.K_s: 1, pg.K_a: 1, pg.K_d: 1}
 
+        self.scores = 0
+
         pl_color = os.getenv("PL_COLOR")
 
         self.color = pl_color if pl_color != None else "green"
-
 
     def control(self, event):
         if event.type == pg.KEYDOWN:
@@ -56,8 +59,21 @@ class Player:
 
     def check_food(self):
         if self.rect.center == self.game.food.rect.center:
-            self.game.food.rect.center = getRandomPos(self.game.WINDOW_SIZE, self.game.TILE_SIZE) # type: ignore
+            self.game.food.rect.center = getRandomPos(self.game.WINDOW_SIZE, self.game.TILE_SIZE)  # type: ignore
             self.length += 1
+            self.scores += self.game.food.cost
+
+            cursor.execute(
+                "UPDATE players SET score = CASE WHEN ? > score THEN ? ELSE score END, \
+                length = CASE WHEN ? > length THEN ? ELSE length END WHERE name = ?;",
+                (self.scores, self.scores, self.length, self.length, self.game.name),
+            )
+
+            connection.commit()
+
+            pg.display.set_caption(
+                f"{self.game.name} --- Score: {self.scores} | Record: {self.game.record['val']}({self.game.record['name']})"
+            )
 
     def check_selfeating(self):
         if len(self.segments) != len(set(segment.center for segment in self.segments)):
@@ -70,7 +86,10 @@ class Player:
             self.segments = self.segments[-self.length :]
 
     def draw(self):
-        [pg.draw.rect(self.game.screen, self.color, segment) for segment in self.segments]
+        [
+            pg.draw.rect(self.game.screen, self.color, segment)
+            for segment in self.segments
+        ]
 
     def getPos(self):
         return getRandomPos(self.game.WINDOW_SIZE, self.game.TILE_SIZE)
