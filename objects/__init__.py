@@ -1,1 +1,3 @@
-from objects.game import Game as Game
+
+from dotenv import load_dotenv
+load_dotenv()
