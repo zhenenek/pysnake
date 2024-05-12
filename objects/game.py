@@ -28,10 +28,10 @@ class Game:
     def draw(self) -> None:
         self.screen.fill("black")
         self.draw_tiles()
+        self.player.draw()
+        # self.food.draw()
 
-    def update(
-        self,
-    ) -> None:
+    def update(self) -> None:
         pg.display.flip()
         self.clock.tick(self.DRAWING_RATE)
 
@@ -40,7 +40,16 @@ class Game:
             if event.type == pg.QUIT:
                 pg.quit()
 
+    def launch(self):
+
+        from objects.player import Player
+
+        self.player = Player(self)
+
+        # self.food = Food(self)
+
     def run(self):
+        self.launch()
         while True:
             self.event()
             self.update()
