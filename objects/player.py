@@ -64,15 +64,14 @@ class Player:
             self.scores += self.game.food.cost
 
             cursor.execute(
-                "UPDATE players SET score = CASE WHEN ? > score THEN ? ELSE score END, \
-                length = CASE WHEN ? > length THEN ? ELSE length END WHERE name = ?;",
-                (self.scores, self.scores, self.length, self.length, self.game.name),
+                "UPDATE players SET score = CASE WHEN ? > score THEN ? ELSE score END WHERE name = ?;",
+                (self.scores, self.scores, self.game.name),
             )
 
             connection.commit()
 
             pg.display.set_caption(
-                f"{self.game.name} --- Score: {self.scores} | Record: {self.game.record['val']}({self.game.record['name']})"
+                f"{self.game.name} - Score: {self.scores} Record: {self.game.record['personal']} | Top: {self.game.record['val']}({self.game.record['name']})"
             )
 
     def check_selfeating(self):

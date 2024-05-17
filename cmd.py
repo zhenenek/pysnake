@@ -12,25 +12,20 @@ if __name__ == "__main__":
     name = sys.argv[1]
 
     cursor.execute(
-        "INSERT OR IGNORE INTO players (name, score, length)  VALUES (?, 0, 1);",
-        (name,),
+        """INSERT INTO players (name, score)
+SELECT ?, 0
+WHERE NOT EXISTS (
+    SELECT 1 FROM players WHERE name = ?
+);
+""",
+        (name, name),
     )
     try:
         connection.commit()
     except:
         ...
 
-    cursor.execute(
-        "SELECT name, score FROM players WHERE score = (SELECT MAX(score) FROM players);"
-    )
-    result = cursor.fetchone()
-
-    if result:
-        record_name, record = result
-    else:
-        record_name, record = "", 0
-
-    game = Game(name, {"val": int(record), "name": record_name})
+    game = Game(name)
     game.run()
 
     connection.close()

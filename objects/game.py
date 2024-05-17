@@ -2,9 +2,11 @@ import os
 from dotenv import load_dotenv
 import pygame as pg
 
+from objects.db import *
+
 
 class Game:
-    def __init__(self, playerName: str, record: dict) -> None:
+    def __init__(self, playerName: str) -> None:
         pg.init()
         # load_dotenv()
 
@@ -19,10 +21,7 @@ class Game:
         self.screen = pg.display.set_mode([self.WINDOW_SIZE] * 2)
         self.clock = pg.time.Clock()
 
-        pg.display.set_caption(f"{playerName} --- Score: 0 | Record: {record['val']}({record['name']})")
-
         self.name = playerName
-        self.record = record
 
     def draw_tiles(self):
         for x in range(0, self.WINDOW_SIZE, self.TILE_SIZE):
@@ -52,6 +51,29 @@ class Game:
 
         from objects.player import Player
         from objects.food import Food
+
+        cursor.execute(
+            "SELECT name, score FROM players WHERE score = (SELECT MAX(score) FROM players);"
+        )
+        result = cursor.fetchone()
+
+        if result:
+            record_name, record = result
+        else:
+            record_name, record = "", 0
+
+        cursor.execute("SELECT score FROM players WHERE name = ?;", (self.name,))
+        personal_record = cursor.fetchone()[0]
+
+        self.record = {
+            "val": int(record),
+            "name": record_name,
+            "personal": personal_record,
+        }
+
+        pg.display.set_caption(
+            f"{self.name} - Score: 0 Record: {personal_record} | Top: {record}({record_name})"
+        )
 
         self.player = Player(self)
 

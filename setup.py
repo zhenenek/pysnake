@@ -11,9 +11,9 @@ connection = sqlite3.connect("players.db")
 cursor = connection.cursor()
 
 try:
-    cursor.execute("CREATE TABLE players ( name TEXT, score INTEGER, length SMALLINT);")
-except:
-    ...
+    cursor.execute("CREATE TABLE players ( name TEXT, score INTEGER);")
+except Exception as e:
+    print(e)
 
 connection.commit()
 connection.close()
